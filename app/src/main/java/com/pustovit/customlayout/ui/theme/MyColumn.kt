@@ -19,7 +19,7 @@ inline fun MyColumn(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val myMeasurePolicy = remember { MyColumnMeasurePolicy(gap) }
+    val myMeasurePolicy = remember(gap) { MyColumnMeasurePolicy(gap) }
     Layout(
         measurePolicy = myMeasurePolicy,
         modifier = modifier,
@@ -28,38 +28,29 @@ inline fun MyColumn(
 }
 
 class MyColumnMeasurePolicy(private val gap: Dp) : MeasurePolicy {
-
     override fun MeasureScope.measure(
-        measurables: List<Measurable>,
-        constraints: Constraints
+        measurables: List<Measurable>, constraints: Constraints
     ): MeasureResult {
-
         // Этап 1 Measure children - Измеряем дочерние элементы
-        val placeables = measurables.map { measurable ->
-            measurable.measure(constraints = constraints)
-        }
-
+        val placeables =
+            measurables.map { measurable -> measurable.measure(constraints = constraints) }
         // Этап 2 Decide ownSize Родитель вычисляет собственный размер
         //  Ширина контента
         val contentWidth = placeables.maxOf { it.width }
-
         //  Высота контента
         val gapPx = gap.toPx().toInt()
         val contentHeight = placeables.sumOf { it.height } + gapPx * placeables.lastIndex
-
         val layoutWidth =
-            constraints.constrainWidth(contentWidth)//contentWidth.coerceIn(constraints.minWidth, constraints.maxWidth)
+            constraints.constrainWidth(contentWidth)
         val layoutHeight =
-            constraints.constrainHeight(contentHeight)//contentHeight.coerceIn(constraints.minHeight, constraints.maxHeight)
-
+            constraints.constrainHeight(contentHeight)
+        // Этап 3 Place children - родитель размещает дочерние UI элементы
         return layout(width = layoutWidth, height = layoutHeight) {
-            val lastIndex = placeables.lastIndex
             var y = 0
-            placeables.forEachIndexed { index, placeable ->
+            placeables.forEach { placeable ->
                 placeable.placeRelative(0, y = y)
-                y += if (index != lastIndex) placeable.height + gapPx else placeable.height
+                y += placeable.height + gapPx
             }
         }
     }
-
 }
