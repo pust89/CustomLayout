@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
+import com.pustovit.customlayout.PriorityParentData
 
 @Composable
 inline fun MyColumn(
@@ -33,7 +34,8 @@ class MyColumnMeasurePolicy(private val gap: Dp) : MeasurePolicy {
     ): MeasureResult {
         // Этап 1 Measure children - Измеряем дочерние элементы
         val placeables =
-            measurables.map { measurable -> measurable.measure(constraints = constraints) }
+            measurables.sortedBy { (it.parentData as? PriorityParentData)?.priority ?: 0 }
+                .map { measurable -> measurable.measure(constraints = constraints) }
         // Этап 2 Decide ownSize Родитель вычисляет собственный размер
         //  Ширина контента
         val contentWidth = placeables.maxOf { it.width }
