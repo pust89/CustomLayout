@@ -1,7 +1,9 @@
 package com.pustovit.customlayout.ui.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
@@ -17,7 +19,12 @@ inline fun MyColumn(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-
+    val myMeasurePolicy = remember { MyColumnMeasurePolicy(gap) }
+    Layout(
+        measurePolicy = myMeasurePolicy,
+        modifier = modifier,
+        content = content
+    )
 }
 
 class MyColumnMeasurePolicy(private val gap: Dp) : MeasurePolicy {
@@ -38,7 +45,7 @@ class MyColumnMeasurePolicy(private val gap: Dp) : MeasurePolicy {
 
         //  Высота контента
         val gapPx = gap.toPx().toInt()
-        val contentHeight = placeables.sumOf { it.height } + gapPx * placeables.size
+        val contentHeight = placeables.sumOf { it.height } + gapPx * placeables.lastIndex
 
         val layoutWidth =
             constraints.constrainWidth(contentWidth)//contentWidth.coerceIn(constraints.minWidth, constraints.maxWidth)
